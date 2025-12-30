@@ -41,8 +41,8 @@ export const auth = betterAuth({
     requireEmailVerification: true,
   },
   emailVerification: {
-    sendOnSignUp:true,
-    
+    sendOnSignUp: true,
+ autoSignInAfterVerification: true,
     sendVerificationEmail: async ({ user, url, token }, request) => {
       // console.log({user,url,token});
       try {
@@ -117,7 +117,7 @@ export const auth = betterAuth({
     <p>If the button doesn't work, copy and paste the link below into your browser:</p>
 
     <p style="word-break: break-all; color:#2b6cb0;">
-      ${verificationUrl}
+      ${url}
     </p>
 
     <p>If you did not create an account, you can safely ignore this email.</p>
@@ -137,4 +137,13 @@ export const auth = betterAuth({
       }
     },
   },
+  socialProviders: {
+        google: { 
+             prompt: "select_account consent", 
+            clientId: process.env.GOOGLE_CLIENT_ID as string, 
+            clientSecret: process.env.GOOGLE_CLIENT_SECRET as string, 
+            accessType: "offline", 
+        
+        }, 
+    },
 });
