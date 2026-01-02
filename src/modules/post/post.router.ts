@@ -7,5 +7,7 @@ import  auth  from "../../middilewares/auth";
 
 const router = Router();
 
+router.get("/",PostController.getAllPost)
+
 router.post("/", auth(UserRole.USER), PostController.createPost);
 export const postRouter = router;
