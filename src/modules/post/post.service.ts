@@ -84,18 +84,52 @@ const getAllPostFromDB = async ({
     });
   }
   const allPost = await prisma.post.findMany({
-    take:limit,
+    take: limit,
     skip,
     where: {
       AND: andConditions,
     },
-    orderBy:{
-      [sortBy]:sortOrder
-    }
+    orderBy: {
+      [sortBy]: sortOrder,
+    },
   });
-  return allPost;
+  const total = await prisma.post.count({
+    where: {
+      AND: andConditions,
+    },
+  });
+  return {
+    data: allPost,
+    pagination: {
+      total,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit),
+    },
+  };
+};
+const getPostByIdFromDB = async (postId: string) => {
+  return await prisma.$transaction(async (tx) => {
+    await tx.post.update({
+      where: {
+        id: postId,
+      },
+      data: {
+        views: {
+          increment: 1,
+        },
+      },
+    });
+    const postData = await tx.post.findUnique({
+      where: {
+        id: postId,
+      },
+    });
+    return postData;
+  });
 };
 export const postService = {
   createPost,
   getAllPostFromDB,
+  getPostByIdFromDB
 };
