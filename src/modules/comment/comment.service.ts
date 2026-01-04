@@ -6,13 +6,13 @@ const createComment = async (payload: {
   postId: string;
   parentId?: string;
 }) => {
-   await prisma.post.findUniqueOrThrow({
+  await prisma.post.findUniqueOrThrow({
     where: {
       id: payload.postId,
     },
   });
   if (payload.parentId) {
-     await prisma.comment.findUniqueOrThrow({
+    await prisma.comment.findUniqueOrThrow({
       where: {
         id: payload.parentId,
       },
@@ -22,6 +22,66 @@ const createComment = async (payload: {
     data: payload,
   });
 };
+const getCommentById = async (commentId: string) => {
+  return await prisma.comment.findUnique({
+    where: {
+      id: commentId,
+    },
+    include: {
+      post: {
+        select: {
+          id: true,
+          title: true,
+          views: true,
+        },
+      },
+    },
+  });
+};
+const getCommentsByAuthor = async (authorId: string) => {
+  return await prisma.comment.findMany({
+    where: {
+      authorId,
+    },
+    orderBy: {
+      createdAt: "desc",
+    },
+    include: {
+      post: {
+        select: {
+          id: true,
+          title: true,
+        },
+      },
+    },
+  });
+};
+const deleteComment = async (commentId: string, authorId: string) => {
+  // console.log({commentId,authorId});
+  const commentData = await prisma.comment.findFirst({
+    where: {
+      id: commentId,
+      authorId,
+    },
+    select: {
+      id: true,
+    },
+    
+  });
+
+  // console.log(commentData);
+  if (!commentData) {
+    throw new Error("Your provided input is invalid");
+  }
+  return await prisma.comment.delete({
+        where:{
+            id:commentData.id
+        }
+    })
+};
 export const commentServices = {
   createComment,
+  getCommentById,
+  getCommentsByAuthor,
+  deleteComment,
 };
