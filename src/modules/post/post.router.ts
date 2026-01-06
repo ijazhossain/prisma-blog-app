@@ -12,6 +12,11 @@ router.get(
   auth(UserRole.USER, UserRole.ADMIN),
   PostController.getMyPosts
 );
+router.get(
+    "/stats",
+    auth(UserRole.ADMIN),
+    PostController.getStats
+)
 router.get("/:postId", PostController.getPostById);
 
 
