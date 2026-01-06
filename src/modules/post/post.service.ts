@@ -208,9 +208,10 @@ const getMyPosts = async (authorId: string) => {
 const updatePost = async (
   postId: string,
   data: Partial<Post>,
-  authorId: string
+  authorId: string,
+  isAdmin: boolean
 ) => {
-  console.log({ postId, data, authorId });
+  // console.log({ postId, data, authorId });
   const postData = await prisma.post.findUniqueOrThrow({
     where: {
       id: postId,
@@ -220,8 +221,11 @@ const updatePost = async (
       authorId: true,
     },
   });
-  if (postData.authorId !== authorId) {
+  if (!isAdmin && postData.authorId !== authorId) {
     throw new Error("You are not authorized");
+  }
+  if(!isAdmin){
+    delete data.isFeatured;
   }
   return await prisma.post.update({
     where: {
