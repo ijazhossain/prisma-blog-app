@@ -67,7 +67,6 @@ const deleteComment = async (commentId: string, authorId: string) => {
     select: {
       id: true,
     },
-    
   });
 
   // console.log(commentData);
@@ -75,63 +74,70 @@ const deleteComment = async (commentId: string, authorId: string) => {
     throw new Error("Your provided input is invalid");
   }
   return await prisma.comment.delete({
-        where:{
-            id:commentData.id
-        }
-    })
-};
-const updateComment = async (commentId: string, data: { content?: string, status?: CommentStatus }, authorId: string) => {
-    const commentData = await prisma.comment.findFirst({
-        where: {
-            id: commentId,
-            authorId
-        },
-        select: {
-            id: true
-        }
-    })
-
-    if (!commentData) {
-        throw new Error("Your provided input is invalid!")
-    }
-
-    return await prisma.comment.update({
-        where: {
-            id: commentId,
-            authorId
-        },
-        data
-    })
-}
-const moderateComment=async(id:string, data:{status:CommentStatus})=>{
-  // console.log({id,data});
-  const commentData=await prisma.comment.findFirstOrThrow({
-    where:{
-      id
-    },select:{
-      id:true,
-      status:true
-    }
-  })
-  
-  if(commentData.status === data.status){
-     throw new Error (`Your provided status (${data.status}) is already up to date`);
-     
-  }else{
-return await prisma.comment.update({
-    where:{
-      id
+    where: {
+      id: commentData.id,
     },
-    data
-  })
+  });
+};
+const updateComment = async (
+  commentId: string,
+  data: { content?: string; status?: CommentStatus },
+  authorId: string
+) => {
+  const commentData = await prisma.comment.findFirst({
+    where: {
+      id: commentId,
+      authorId,
+    },
+    select: {
+      id: true,
+    },
+  });
+
+  if (!commentData) {
+    throw new Error("Your provided input is invalid!");
   }
-  
-}
+
+  return await prisma.comment.update({
+    where: {
+      id: commentId,
+      authorId,
+    },
+    data,
+  });
+};
+const moderateComment = async (id: string, data: { status: CommentStatus }) => {
+  // console.log({id,data});
+  const commentData = await prisma.comment.findFirstOrThrow({
+    where: {
+      id,
+    },
+    select: {
+      id: true,
+      status: true,
+    },
+  });
+
+  if (commentData.status === data.status) {
+    throw new Error(
+      `Your provided status (${data.status}) is already up to date`
+    );
+  } else {
+    return await prisma.comment.update({
+      where: {
+        id,
+      },
+      data,
+    });
+  }
+};
+
 export const commentServices = {
   createComment,
   getCommentById,
   getCommentsByAuthor,
   deleteComment,
   updateComment,
-  moderateComment
+  moderateComment,
+  
 };

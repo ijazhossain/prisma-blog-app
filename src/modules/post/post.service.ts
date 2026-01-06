@@ -170,8 +170,70 @@ const getPostByIdFromDB = async (postId: string) => {
     return postData;
   });
 };
+const getMyPosts = async (authorId: string) => {
+  const userInfo = await prisma.user.findUniqueOrThrow({
+    where: {
+      id: authorId,
+      status: "ACTIVE",
+    },
+    select: {
+      id: true,
+    },
+  });
+  const result = await prisma.post.findMany({
+    where: {
+      authorId,
+    },
+    orderBy: {
+      createdAt: "desc",
+    },
+    include: {
+      _count: {
+        select: {
+          comments: true,
+        },
+      },
+    },
+  });
+  /*  const total = await prisma.post.aggregate({
+    _count: {
+      id:true,
+    },
+     where: {
+      authorId,
+    },
+  }); */
+  return result;
+};
+const updatePost = async (
+  postId: string,
+  data: Partial<Post>,
+  authorId: string
+) => {
+  console.log({ postId, data, authorId });
+  const postData = await prisma.post.findUniqueOrThrow({
+    where: {
+      id: postId,
+    },
+    select: {
+      id: true,
+      authorId: true,
+    },
+  });
+  if (postData.authorId !== authorId) {
+    throw new Error("You are not authorized");
+  }
+  return await prisma.post.update({
+    where: {
+      id: postData.id,
+    },
+    data,
+  });
+};
 export const postService = {
   createPost,
   getAllPostFromDB,
   getPostByIdFromDB,
+  getMyPosts,
+  updatePost,
 };

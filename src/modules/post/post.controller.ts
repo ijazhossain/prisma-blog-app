@@ -68,24 +68,68 @@ const getAllPost = async (req: Request, res: Response) => {
     });
   }
 };
-const getPostById=async(req: Request, res: Response)=>{
+const getPostById = async (req: Request, res: Response) => {
   try {
-        const { postId } = req.params;
-        // console.log(postId);
-        if (!postId) {
-            throw new Error("Post Id is required!")
-        }
-        const result = await postService.getPostByIdFromDB(postId);
-        res.status(200).json(result)
-    } catch (e) {
-        res.status(400).json({
-            error: "Post retrieved failed",
-            details: e
-        })
+    const { postId } = req.params;
+    // console.log(postId);
+    if (!postId) {
+      throw new Error("Post Id is required!");
     }
-}
+    const result = await postService.getPostByIdFromDB(postId);
+    res.status(200).json(result);
+  } catch (e) {
+    res.status(400).json({
+      error: "Post retrieved failed!!!",
+      details: e,
+    });
+  }
+};
+const getMyPosts = async (req: Request, res: Response) => {
+  try {
+    const user = req.user;
+    console.log({ user });
+    if (!user) {
+      throw new Error("You are unauthorized!");
+    }
+    console.log({ user });
+    const result = await postService.getMyPosts(user.id);
+    res.status(200).json(result);
+  } catch (err) {
+    res.status(400).json({
+      error: "Post fetched failed",
+      details: err,
+    });
+  }
+};
+const updatePost = async (req: Request, res: Response) => {
+  try {
+    const user = req.user;
+    if (!user) {
+      throw new Error("You are unauthorized");
+    }
+    const { postId } = req.params;
+    const result = await postService.updatePost(
+      postId as string,
+      req.body,
+      user.id
+    );
+    res.status(200).json(result);
+  } catch (err) {
+    const errorMMessage =
+      err instanceof Error
+        ? err.message
+        : "Post update failed!";
+
+    res.status(400).json({
+      error: errorMMessage,
+      details: err,
+    });
+  }
+};
 export const PostController = {
   createPost,
   getAllPost,
-  getPostById
+  getPostById,
+  getMyPosts,
+  updatePost
 };
