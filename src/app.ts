@@ -5,6 +5,7 @@ import { auth } from "./lib/auth";
 import cors from "cors";
 import { commentRouter } from "./modules/comment/comment.router";
 import errorHandler from "./middilewares/globalErrorHandler";
+import { notFound } from "./middilewares/notFound";
 const app: Application = express();
 app.use(
   cors({
@@ -20,5 +21,6 @@ app.use("/comments", commentRouter);
 app.get("/", (req, res) => {
   res.send("Prisma blog app is running");
 });
+app.use(notFound)
 app.use(errorHandler)
 export default app;
